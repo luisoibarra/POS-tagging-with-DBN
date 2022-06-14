@@ -105,6 +105,10 @@ El conjunto de variables observadas elegido fue un sencillo conjunto de dos vari
 
 Luego se realizó una mejora al modelo agregándole más información sobre las palabras por medio de añadirle más variables observadas. Las agregadas fueron las variables si la palabra es un número y si la palabra contiene un signo de puntuación. Con esta modificación se logró alcanzar un 50% de precisión en las pruebas.
 
+|           | Baseline | RBD (Upper, Hyphen) | RBD (Upper, Hyphen, Num, Punct) |
+| --------- | -------- | ------------------- | ------------------------------- |
+| Precisión | 8%       | 40%                 | 50%                             |
+
 Los resultados anteriores puede ser posible mejorarlos con la investigación de un conjunto de atributos que puedan ayudar a mejorar la identificación de las variables ocultas. Esto se pudo observar en la modificación al agregarle las variables en el segundo experimento. 
 
 ## Referencias
