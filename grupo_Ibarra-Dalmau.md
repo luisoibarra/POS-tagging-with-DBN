@@ -9,7 +9,7 @@
 
 Las RBD son una extensión de las RB para modelar ditribuciones de probabiliad de secuencias sobre una colección semi-infinitas de variables aleatorias. El término dinámico se refiere a que se modela un sistema dinámico, no que la red cambia con el tiempo, aunque existen modelos que pueden hacerlo. Para la representación del instante de tiempo, las variables se sufijan con el número correspondiente a este.
 
-Una RBD esta compuesta por un par ($B1$, $B_{arrow}$) en donde B1 define la distribución del estado inicial en el tiempo y B_arrow es una two-slice Temporal Bayes Network (2TBN) que define la transición entre el estado $Z_{t-1}$ al $Z_t$, o sea $P(Z_t|Z_{t-1})$, esta es representada por un grafo dirigido acíclico. La definición anterior trae implícita la propiedad Markoviana de las RBD entre diferentes tiempos, $(Z_{t+1} \perp Z_{t-1} | Z_{t})$.
+Una RBD esta compuesta por un par ($B1$, $B_{arrow}$) en donde B1 define la distribución del estado inicial en el tiempo y B_arrow es una two-slice Temporal Bayes Network (2TBN) que define la transición entre el estado $Z_{t-1}$ al $Z_t$, o sea $P(Z_t | Z_{t-1})$ , esta es representada por un grafo dirigido acíclico. La definición anterior trae implícita la propiedad Markoviana de las RBD entre diferentes tiempos, $(Z_{t+1} \perp Z_{t-1} | Z_{t})$.
 
 $$
 P(Z_t|Z_{t-1}) = \Pi_{i=1}^{N} P(Z_t^i|Pa(Z^i_t))
@@ -60,7 +60,7 @@ $$
 
 Este algoritmo tiene dos pasos, el paso hacia adelante en el que se calcula $\alpha_t$ y el paso hacia atrás en donde se calcula $\beta_t$ para conocer el objetivo del cálculo $\gamma_t$.
 
-En el paso hacia adelante se computa recursivamente $alpha_t$
+En el paso hacia adelante se computa recursivamente $\alpha_t$
 
 $$
 \alpha_t(j) = P(X_t = j|y_{1:t}) = \frac{1}{c_t}P(X_t = j, y_t|y_{1:t-1})
