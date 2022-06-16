@@ -17,7 +17,7 @@ $$
 
 Donde $Z_t^i$ es el i-ésimo nodo en tiempo t.
 
-![images/2TSBN.png](images/2TSBN.png)
+![2TBN](images/2TSBN.png)
 
 En la figura anterior se representa una posible definición de una $B_{arrow}$ de una RBD.
 
@@ -27,7 +27,7 @@ Los Modelos Ocultos de Markov (MOM) y los Modelos Filtros de Kalman (MFK) son ca
 
 **Modelo Oculto de Markov como RBD**
 
-![images/HMMasDBN.jpg](images/HMMasDBN.jpg)
+![Modelo Oculto de Markov](images/HMMasDBN.jpg)
 
 Donde:
 - $\pi$: Distribución inicial de $X_1$
@@ -41,6 +41,12 @@ Donde:
 La representación es similar al MOM, ya que ambos asumen lo mismo, la diferencia radica en que las variables de MFK son variables continuas que distribuyen normal.
 
 ### Inferencia
+
+La inferencia en las RDB se concentra en encontrar el valor de:
+
+$$
+P(X_t^i|y_{1:T})
+$$
 
 **Algoritmo forwards-backwards**
 
@@ -153,13 +159,13 @@ Se creó un algoritmo que generaliza el anotado de POS para una estructura parti
 
 El modelado corresponde al siguiente grafo:
 
-![images/DBN.jpg](images/DBN.jpg)
+![RBD Modelo General](images/DBN.jpg)
 
 En el modelo se observa la definición de una 2TBN. En el caso particular del problema a resolver existe solo una variable oculta, la etiqueta POS, pero se puede extender a que múltiples variables ocultas con facilidad. La restricción de las variables ocultas ($H_i$,$t$) es que solo se conectan con su correspondiente en el intervalo de tiempo siguiente ($H_i$,$t+1$) y que se conectan con todas las variables observadas en su intervalo de tiempo ($O_i$,$t$). Lo interesante de este modelo es la flexibilidad con que se pueden añadir atributos observables.
 
 El modelo concreto implementado se observa en la siguiente figura, añadiendo la posibilidad de agregar nuevos atributos:
 
-![images/DBN POS.jpg](images/DBN_POS.jpg)
+![RBD Modelo POS](images/DBN_POS.jpg)
 
 ### Entrenamiento
 
@@ -181,7 +187,7 @@ Para la implementación del modelo nos basamos en la biblioteca **pgmpy**. En es
 
 ### Resultados
 
-El conjunto de variables observadas elegido fue un sencillo conjunto de dos variables, estas son si la letra comienza con mayúscula y si la palabra contiene un - en ella. Se entrenó el modelo con el corpus de Brown de nltk. El resultado fue una precisión del 40%. Aunque resultado es bajo con respecto al estado del arte del problema que se encuentra por encima del 95%, es superior a un anotador random, el cual con el conjunto universal de etiquetas alcanzaría aproximadamente un 8% (1/|Cantidad de etiquetas POS|).
+El conjunto de variables observadas elegido inicialmente fue un sencillo conjunto de dos variables, estas son si la letra comienza con mayúscula y si la palabra contiene un - en ella. Se entrenó el modelo con el corpus de Brown de nltk. El resultado fue una precisión del 40%. Aunque resultado es bajo con respecto al estado del arte del problema que se encuentra por encima del 95%, es superior a un anotador random, el cual con el conjunto universal de etiquetas alcanzaría aproximadamente un 8% ($\frac{1}{|EtiquetasPOS|}$).
 
 Luego se realizó una mejora al modelo agregándole más información sobre las palabras por medio de añadirle más variables observadas. Las agregadas fueron las variables si la palabra es un número y si la palabra contiene un signo de puntuación. Con esta modificación se logró alcanzar un 50% de precisión en las pruebas.
 
