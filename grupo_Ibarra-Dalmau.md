@@ -9,19 +9,19 @@
 
 Las RBD son una extensión de las RB para modelar ditribuciones de probabiliad de secuencias sobre una colección semi-infinitas de variables aleatorias. El término dinámico se refiere a que se modela un sistema dinámico, no que la red cambia con el tiempo, aunque existen modelos que pueden hacerlo. Para la representación del instante de tiempo, las variables se sufijan con el número correspondiente a este.
 
-Una RBD esta compuesta por un par (B1, B_arrow) en donde B1 define la distribución del estado inicial en el tiempo y B_arrow es una two-slice Temporal Bayes Network (2TBN) que define la transición entre el estado Z\_{t-1} al Z_t, o sea P(Z_t|Z\_{t-1}), esta es representada por un grafo dirigido acíclico. La definición anterior trae implícita la propiedad Markoviana de las RBD entre diferentes tiempos, (Z\_{t+1} \_|\_ Z\_{t-1} | Z_{t}).
+Una RBD esta compuesta por un par ($B1$, $B_{arrow}$) en donde B1 define la distribución del estado inicial en el tiempo y B_arrow es una two-slice Temporal Bayes Network (2TBN) que define la transición entre el estado $Z_{t-1}$ al $Z_t$, o sea $P(Z_t|Z_{t-1})$, esta es representada por un grafo dirigido acíclico. La definición anterior trae implícita la propiedad Markoviana de las RBD entre diferentes tiempos, $(Z_{t+1} \_|\_ Z_{t-1} | Z_{t})$.
 
 $$
 P(Z_t|Z_{t-1}) = \Pi_{i=1}^{N} P(Z_t^i|Pa(Z^i_t))
 $$
 
-Donde Z_t^i es el i-ésimo nodo en tiempo t.
+Donde $Z_t^i$ es el i-ésimo nodo en tiempo t.
 
 ![images/2TSBN.png](images/2TSBN.png)
 
-En la figura anterior se representa una posible definición de una B_arrow de una RBD.
+En la figura anterior se representa una posible definición de una $B_{arrow}$ de una RBD.
 
-Generalmente las variables Z_t se dividen en tres grupos, variables ocultas X_t, variables observables Y_t y variables de control U_t. Las variables ocultas son estados no observados en el proceso modelado, las variables observables son estados observados del proceso y las variables de control son estados impuestos por medios externos al modelo que pueden influenciar las variables ocultas de este.
+Generalmente las variables $Z_t$ se dividen en tres grupos, variables ocultas X_t, variables observables $Y_t$ y variables de control $U_t$. Las variables ocultas son estados no observados en el proceso modelado, las variables observables son estados observados del proceso y las variables de control son estados impuestos por medios externos al modelo que pueden influenciar las variables ocultas de este.
 
 Los Modelos Ocultos de Markov (MOM) y los Modelos Filtros de Kalman (MFK) son casos específicos de estas, demostrando así su gran poder expresivo de las RBD.
 
@@ -30,11 +30,11 @@ Los Modelos Ocultos de Markov (MOM) y los Modelos Filtros de Kalman (MFK) son ca
 ![images/HMMasDBN.jpg](images/HMMasDBN.jpg)
 
 Donde:
-- pi: Distribución inicial de X_1
-- X_i: Variable Oculta en el time-slice i
-- Y_i: Variable Observada en el time-slice i
-- A: Matriz estocástica de transición entre Estados Ocultos
-- B: Matriz estocástica de observación entre el Estado Oculto y el Estado Observado (Caso Discreto)
+- $\pi$: Distribución inicial de $X_1$
+- $X_i$: Variable Oculta en el time-slice i
+- $Y_i$: Variable Observada en el time-slice i
+- $A$: Matriz estocástica de transición entre Estados Ocultos
+- $B$: Matriz estocástica de observación entre el Estado Oculto y el Estado Observado (Caso Discreto)
 
 **Modelo Filtro de Kalman como RBD**
 
@@ -42,17 +42,83 @@ La representación es similar al MOM, ya que ambos asumen lo mismo, la diferenci
 
 ### Inferencia
 
-El objetivo de la inferencia en una RBD es el cómputo de P(X-t^i|y_{1:r}). En dependencia del valor de r se dividen en diferentes nombres:
+**Algoritmo forwards-backwards**
 
-- r = t: Filtrado
-- r > t: Suavizado
-- r < t: Predicción
+Para el caso discreto de una RBD se convierte esta en un Modelo Oculto de Markov y se aplica sobre esta nueva red el algoritmo antes mencionado:
 
-Para esto existen diferentes algoritmos:
+Se define:
 
-- Inferencia hacia adelante (Forward Inference)
-- Inferencia hacia atrás (Backward Inference)
-- Interface
+$$
+\alpha_t(i) = P(X_t = i | y_{1:t})
+$$
+$$
+\beta_t(i) = P(y_{t+1:T} | X_t=i)
+$$
+$$
+\gamma_t(i) = P(X_t=i | y_{1:T}) = \frac{1}{P(y_{1:T})} \alpha_t(i) * \beta_t(i)
+$$
+
+Este algoritmo tiene dos pasos, el paso hacia adelante en el que se calcula $\alpha_t$ y el paso hacia atrás en donde se calcula $\beta_t$ para conocer el objetivo del cálculo $\gamma_t$.
+
+En el paso hacia adelante se computa recursivamente alpha_t
+
+$$
+\alpha_t(j) = P(X_t = j|y_{1:t}) = \frac{1}{c_t}P(X_t = j, y_t|y_{1:t-1})
+$$
+
+Donde
+
+$$
+P(X_t = j, y_t|y_{1:t-1}) = (\sum_i P(X_t = j | X_{t-1} = i) P(X_{t-1}=i|y_{1:t-1})) P(y_t|X_t=j)
+$$
+
+y
+
+$$
+c_t = P(y_t|y_{1:t-1}) = \sum_j P(X_t = j, y_t | y_{1:t-1})
+$$
+
+En la definición de la RBD se tienen las distribuciones de:
+
+$$
+P(X_t = j | X_{t-1} = i) \quad y \quad P(y_t|X_t=j)
+$$
+
+Que son las probabilidades de transición y emisión respectivamente del modelo de Markov. Por lo que la expresión que queda es:
+
+$$
+\alpha_{t-1}(i) = P(X_{t-1}=i|y_{1:t-1})
+$$
+
+En el paso hacia atrás:
+
+Se tiene como caso base
+
+$$
+\beta_T(i) = 1 = Pr(y_{T+1:T}|X_T=i) = Pr(\emptyset|X_T = i)
+$$
+
+El paso recursivo es:
+
+$$
+P(y_{t+1:T}| X_t = i) = \sum_j P(y_{t+2:T}, X_{t+1}=j, y_{t+1})
+$$
+
+$$
+P(y_{t+1:T}| X_t = i) = \sum_j P(y_{t+2:T}| X_{t+1}=j, y_{t+1}, X_t=i) P(X_{t+1}=j, y_{t+1}|X_t = i)
+$$
+
+$$
+P(y_{t+1:T}| X_t = i) = \sum_j P(y_{t+2:T}| X_{t+1}=j) P(y_{t+1}| X_{t+1}=j)P(X_{t+1}=j, y_{t+1}|X_t = i)
+$$
+
+$$
+\beta_{t}(i) = \sum_j \beta_{t+1}(j) P(y_{t+1}| X_{t+1}=j)P(X_{t+1}=j, y_{t+1}|X_t = i)
+$$
+
+Donde igualmente se las expresiones restantes en la definición de la RBD.
+
+Finalmente con las expresiones de $\alpha$ y $\beta$ se calcula $\gamma$.
 
 ## Descripción Práctica
 
@@ -89,11 +155,25 @@ El modelado corresponde al siguiente grafo:
 
 ![images/DBN.jpg](images/DBN.jpg)
 
-En el modelo se observa la definición de una 2TBN. En el caso particular del problema a resolver existe solo una variable oculta, la etiqueta POS, pero se puede extender a que múltiples variables ocultas con facilidad. La restricción de las variables ocultas (H_i,t) es que solo se conectan con su correspondiente en el intervalo de tiempo siguiente (H_i,t+1) y que se conectan con todas las variables observadas en su intervalo de tiempo (O_i,t). Lo interesante de este modelo es la flexibilidad con que se pueden añadir atributos observables.
+En el modelo se observa la definición de una 2TBN. En el caso particular del problema a resolver existe solo una variable oculta, la etiqueta POS, pero se puede extender a que múltiples variables ocultas con facilidad. La restricción de las variables ocultas ($H_i$,$t$) es que solo se conectan con su correspondiente en el intervalo de tiempo siguiente ($H_i$,$t+1$) y que se conectan con todas las variables observadas en su intervalo de tiempo ($O_i$,$t$). Lo interesante de este modelo es la flexibilidad con que se pueden añadir atributos observables.
 
 El modelo concreto implementado se observa en la siguiente figura, añadiendo la posibilidad de agregar nuevos atributos:
 
 ![images/DBN POS.jpg](images/DBN_POS.jpg)
+
+### Entrenamiento
+
+Para el entrenamiento se construyeron las tablas de la red usando los bigramas encontrados en el corpus para aprender las distribuciones de las variables.
+
+Se particionó el corpus en 2 conjuntos, el conjunto de entrenamiento y el conjunto de pruebas, con una proporción de 70%-30% respectivamente.
+
+### Algoritmo
+
+El algoritmo se basa en tomar la etiqueta POS más probable de la palabra dados la etiqueta POS anterior y los valores de las variables observadas de la palabra en cuestión. Este proceso se repite hasta que se acaben la palabra teniendo al final la cadena anotada con las etiquetas POS correspondientes.
+
+$$
+POS_t = arg \max_i P(POS_t = i | POS_{t-1}, Obs_t)
+$$
 
 ### Software
 
